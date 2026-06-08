@@ -1,2 +1,0 @@
-# sale
-sale for car
