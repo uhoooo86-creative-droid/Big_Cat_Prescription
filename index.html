@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BigCat Drug Store · 티칭 처방 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue: #1A6FE8;
+    --blue-dark: #0D4DB5;
+    --blue-light: #5B9EF5;
+    --blue-pale: #D6E8FF;
+    --white: #FFFFFF;
+    --off-white: #F0F5FF;
+    --text-dark: #0A1F5C;
+    --text-mid: #3A5A9C;
+    --text-muted: #7A9ACC;
+    --cross-blue: #1A6FE8;
+    --accent-red: #FF4757;
+    --accent-mint: #2EDCB5;
+    --accent-yellow: #FFD93D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--off-white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    width: 100%;
+    max-width: 480px;
+    background: var(--white);
+    border-bottom: 3px solid var(--blue-pale);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(26,111,232,0.12);
+  }
+  .header-top {
+    background: var(--blue-dark);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cross-icon {
+    width: 36px;
+    height: 36px;
+    position: relative;
+  }
+  .cross-icon::before {
+    content: '+';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: white;
+    line-height: 1;
+  }
+  .brand-text {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+  }
+  .brand-text .main { font-size: 20px; color: white; line-height: 1; }
+  .brand-text .sub { font-size: 11px; color: var(--blue-pale); font-family: 'Noto Sans KR', sans-serif; font-weight: 500; }
+  .reset-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    display: none;
+  }
+  .reset-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-top: 1px solid var(--blue-pale);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+  .tab-sub { font-size: 10px; font-weight: 500; margin-top: 1px; }
+
+  /* ── CONTENT WRAPPER ── */
+  .content {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px 16px 40px;
+    flex: 1;
+  }
+
+  /* ── PANELS ── */
+  .panel { display: none; animation: fadeUp 0.4s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── HERO BANNER (intro) ── */
+  .hero-banner {
+    background: var(--blue);
+    border-radius: 20px;
+    padding: 0;
+    margin-bottom: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-top {
+    background: var(--blue-dark);
+    padding: 6px 16px;
+    font-size: 10px;
+    color: var(--blue-pale);
+    letter-spacing: 2px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .hero-body {
+    padding: 24px 20px;
+    position: relative;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0px, transparent 1px, transparent 24px),
+                      repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, transparent 1px, transparent 24px);
+  }
+  .hero-pills {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    font-size: 48px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  }
+  .hero-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: white;
+    line-height: 1;
+    letter-spacing: 1px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  .hero-title span { color: var(--accent-yellow); }
+  .hero-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+    position: relative;
+  }
+  .hero-footer {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .hero-footer-text { font-size: 11px; color: rgba(255,255,255,0.6); }
+  .visit-badge {
+    background: white;
+    color: var(--blue-dark);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  /* ── NOTICE BOX ── */
+  .notice-box {
+    background: #FFFBEB;
+    border: 1.5px solid #FDE68A;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: #92400E;
+    line-height: 1.6;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(26,111,232,0.07);
+    border: 1.5px solid var(--blue-pale);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── FORM ── */
+  .form-row { margin-bottom: 12px; }
+  .form-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--blue-pale);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text-dark);
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    background: white;
+  }
+  .form-input:focus { border-color: var(--blue); }
+
+  /* ── STEPS ── */
+  .step-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .step-num {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .step-title { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+  .step-desc { font-size: 12px; color: var(--text-muted); }
+
+  /* ── START BUTTON ── */
+  .start-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--blue);
+    border: none;
+    border-radius: 14px;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .start-btn:hover { background: var(--blue-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,111,232,0.35); }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .progress-label { color: var(--text-muted); font-weight: 600; }
+  .progress-pct { color: var(--blue); font-weight: 800; }
+  .progress-bar { height: 8px; background: var(--blue-pale); border-radius: 99px; overflow: hidden; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--blue-light));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── QUESTION CARD ── */
+  .q-card {
+    background: white;
+    border-radius: 18px;
+    padding: 22px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 20px rgba(26,111,232,0.10);
+    border: 2px solid var(--blue-pale);
+    animation: fadeUp 0.35s ease;
+  }
+  .q-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.65;
+    letter-spacing: -0.3px;
+  }
+
+  /* ── OPTIONS ── */
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%;
+    padding: 13px 16px;
+    background: white;
+    border: 2px solid var(--blue-pale);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    text-align: left;
+    transition: all 0.18s;
+  }
+  .option-btn:hover {
+    border-color: var(--blue);
+    background: var(--off-white);
+    transform: translateX(4px);
+    box-shadow: 0 4px 14px rgba(26,111,232,0.14);
+  }
+  .opt-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .opt-text { font-size: 13px; color: var(--text-dark); font-weight: 500; line-height: 1.5; }
+
+  /* ── PRESCRIPTION RESULT ── */
+  .rx-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 28px rgba(26,111,232,0.14);
+    margin-bottom: 16px;
+    border: 2px solid var(--blue-pale);
+  }
+  .rx-header {
+    padding: 22px 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .rx-header-bg {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, transparent 1px, transparent 20px);
+  }
+  .rx-tag {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    opacity: 0.75;
+    font-weight: 700;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .rx-type-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+  }
+  .rx-emoji { font-size: 52px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+  .rx-type-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .rx-date { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+
+  .rx-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    background: var(--off-white);
+    padding: 14px 18px;
+    border-bottom: 1.5px solid var(--blue-pale);
+  }
+  .rx-info-item .lbl { font-size: 9px; color: var(--text-muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .rx-info-item .val { font-size: 13px; color: var(--text-dark); font-weight: 700; }
+
+  .rx-body { padding: 18px; }
+  .rx-desc {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.75;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1.5px dashed var(--blue-pale);
+  }
+
+  .rx-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .rx-col { border-radius: 12px; padding: 14px; }
+  .rx-col-title { font-size: 12px; font-weight: 700; margin-bottom: 9px; }
+  .rx-col-item {
+    font-size: 11px;
+    color: var(--text-dark);
+    padding: 3px 0;
+    display: flex;
+    gap: 5px;
+    line-height: 1.5;
+  }
+
+  .scores-box {
+    background: var(--off-white);
+    border-radius: 12px;
+    padding: 14px;
+    border: 1.5px solid var(--blue-pale);
+  }
+  .scores-title { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.5px; }
+  .score-row { margin-bottom: 8px; }
+  .score-meta { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .score-key { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .score-val { font-size: 11px; font-weight: 800; }
+  .score-bar { height: 6px; background: var(--blue-pale); border-radius: 99px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 99px; transition: width 1.2s ease; }
+
+  /* ── ACTION BTNS ── */
+  .action-row { display: flex; gap: 10px; margin-bottom: 8px; }
+  .btn-outline {
+    flex: 1;
+    padding: 14px;
+    background: white;
+    border: 2px solid var(--blue);
+    border-radius: 12px;
+    color: var(--blue);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { background: var(--off-white); }
+  .btn-primary {
+    flex: 1;
+    padding: 14px;
+    background: var(--blue);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .notice-tiny { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── PHARMACY ── */
+  .pharmacy-hero {
+    background: var(--blue-dark);
+    border-radius: 20px;
+    padding: 0;
+    margin-bottom: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ph-signage {
+    background: white;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 3px solid var(--blue-pale);
+  }
+  .ph-cross {
+    width: 48px;
+    height: 48px;
+    background: var(--blue);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .ph-sign-text { font-family: 'Bebas Neue', sans-serif; }
+  .ph-sign-text .l1 { font-size: 11px; color: var(--text-muted); letter-spacing: 2px; }
+  .ph-sign-text .l2 { font-size: 26px; color: var(--blue-dark); letter-spacing: 0.5px; line-height: 1; }
+  .ph-body {
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ph-body-text { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  .ph-arrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: white;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 6px 14px;
+    letter-spacing: 2px;
+  }
+
+  /* recommended kits */
+  .rec-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(26,111,232,0.07);
+    border: 1.5px solid var(--blue-pale);
+  }
+  .rec-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .rec-title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+  .rec-sub { font-size: 11px; color: var(--text-muted); }
+  .rec-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rec-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 10px;
+    padding: 7px 11px;
+    border: 1.5px solid;
+  }
+  .rec-chip-label { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; }
+  .rec-chip-name { font-size: 12px; font-weight: 700; color: var(--text-dark); }
+
+  /* kit accordion */
+  .kits-title { font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+  .kit-item {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(26,111,232,0.06);
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .kit-item.recommended { border-color: var(--blue-pale); }
+  .kit-head {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .kit-head:hover { background: var(--off-white); }
+  .kit-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .kit-name { font-size: 14px; font-weight: 900; color: var(--text-dark); }
+  .kit-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-top: 2px; }
+  .kit-badge {
+    font-size: 9px;
+    font-weight: 700;
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: white;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+  .kit-chevron {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .kit-body {
+    display: none;
+    padding: 14px 16px;
+    border-top: 1.5px solid var(--blue-pale);
+  }
+  .kit-body.open { display: block; animation: fadeUp 0.25s ease; }
+  .kit-items-title { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.5px; }
+  .kit-item-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .kit-item-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .kit-item-text { font-size: 12px; color: var(--text-dark); line-height: 1.5; }
+  .kit-footer {
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: var(--off-white);
+    border-radius: 8px;
+    border: 1px dashed var(--blue-pale);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .pharmacy-notice {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 18px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="app-header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="cross-icon"></div>
+      <div class="brand-text">
+        <div class="main">BigCat Drug Store</div>
+        <div class="sub">티칭 처방 시스템</div>
+      </div>
+    </div>
+    <button class="reset-btn" id="resetBtn" onclick="resetAll()">↺ 다시 진단</button>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabHospital" onclick="switchTab('hospital')">
+      🏥 병원<div class="tab-sub">진단·처방</div>
+    </button>
+    <button class="tab-btn" id="tabPharmacy" onclick="switchTab('pharmacy')">
+      💊 약국<div class="tab-sub">키트 수령</div>
+    </button>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- ═══════════ HOSPITAL TAB ═══════════ -->
+  <div class="panel active" id="panelHospital">
+
+    <!-- INTRO -->
+    <div id="phaseIntro">
+      <div class="hero-banner">
+        <div class="hero-top">BIGCAT DRUG STORE · TEACHING PRESCRIPTION SYSTEM</div>
+        <div class="hero-body">
+          <div class="hero-grid-bg"></div>
+          <div class="hero-pills">💊</div>
+          <div class="hero-label">YOUR TRUSTED</div>
+          <div class="hero-title">TEACHING<br/><span>PHARMACY</span></div>
+          <div class="hero-sub">강사의 수업을 진단하고<br/>오늘 필요한 티칭 처방을 드립니다</div>
+        </div>
+        <div class="hero-footer">
+          <div class="hero-footer-text">Looking for your teaching style? We've got everything you need!</div>
+          <div class="visit-badge">VISIT US</div>
+        </div>
+      </div>
+
+      <div class="notice-box">
+        <span>⚠️</span>
+        <span>본 자료는 교육용 티칭 처방 자료이며 실제 의약품이 아닙니다. 강사 연수와 수업 자료 추천을 위한 브랜딩 콘셉트입니다.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 문진표 작성</div>
+        <div class="form-row">
+          <label class="form-label">이름</label>
+          <input class="form-input" id="inputName" placeholder="홍길동" type="text"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">기관명</label>
+          <input class="form-input" id="inputOrg" placeholder="빅캣 영어학원" type="text"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">담당 연령</label>
+          <input class="form-input" id="inputAge" placeholder="7세~10세" type="text"/>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📍 진행 순서</div>
+        <div class="step-row">
+          <div class="step-num">01</div>
+          <div><div class="step-title">진단</div><div class="step-desc">20문항 수업 성향 진단</div></div>
+        </div>
+        <div class="step-row">
+          <div class="step-num" style="background:#FF4757;">02</div>
+          <div><div class="step-title">처방</div><div class="step-desc">유형 결과 + 강점 / 주의점</div></div>
+        </div>
+        <div class="step-row" style="margin-bottom:0;">
+          <div class="step-num" style="background:#2EDCB5;">03</div>
+          <div><div class="step-title">약국</div><div class="step-desc">맞춤 키트 수령</div></div>
+        </div>
+      </div>
+
+      <button class="start-btn" onclick="startQuiz()">
+        + SEE THE DOCTOR →
+      </button>
+    </div><!-- /phaseIntro -->
+
+    <!-- QUIZ -->
+    <div id="phaseQuiz" style="display:none;">
+      <div class="progress-wrap">
+        <div class="progress-meta">
+          <span class="progress-label" id="progressLabel">문항 1 / 20</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-num" id="qNum">Q1</div>
+        <div class="q-text" id="qText"></div>
+      </div>
+      <div class="options-list" id="optionsList"></div>
+    </div><!-- /phaseQuiz -->
+
+    <!-- RESULT -->
+    <div id="phaseResult" style="display:none;">
+      <div class="rx-card">
+        <div class="rx-header" id="rxHeader">
+          <div class="rx-header-bg"></div>
+          <div class="rx-tag">BIGCAT HOSPITAL · TEACHING PRESCRIPTION Rx</div>
+          <div class="rx-type-row">
+            <div class="rx-emoji" id="rxEmoji">🎭</div>
+            <div>
+              <div class="rx-type-name" id="rxTypeName">엔터테이너형</div>
+              <div class="rx-date" id="rxDate"></div>
+            </div>
+          </div>
+        </div>
+        <div class="rx-info-grid" id="rxInfoGrid"></div>
+        <div class="rx-body">
+          <p class="rx-desc" id="rxDesc"></p>
+          <div class="rx-cols">
+            <div class="rx-col" style="background:#F0FFF4;">
+              <div class="rx-col-title" style="color:#22863A;">✅ 강점</div>
+              <div class="rx-col-item"><span style="color:#22863A;">•</span>분위기를 빠르게 살린다</div>
+              <div class="rx-col-item"><span style="color:#22863A;">•</span>참여를 자연스럽게 끌어낸다</div>
+              <div class="rx-col-item"><span style="color:#22863A;">•</span>수업 에너지가 높아 몰입감이 좋다</div>
+            </div>
+            <div class="rx-col" style="background:#FFF5F5;">
+              <div class="rx-col-title" style="color:#C0392B;">⚠️ 주의점</div>
+              <div class="rx-col-item"><span style="color:#C0392B;">•</span>마무리가 약해질 수 있다</div>
+              <div class="rx-col-item"><span style="color:#C0392B;">•</span>활동 전환이 급할 수 있다</div>
+              <div class="rx-col-item"><span style="color:#C0392B;">•</span>학습 포인트 정리가 부족할 수 있다</div>
+            </div>
+          </div>
+          <div class="scores-box">
+            <div class="scores-title">📊 성향 점수</div>
+            <div id="scoresBars"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn-outline" onclick="printPrescription()">🖨️ 처방전 출력</button>
+        <button class="btn-primary" onclick="switchTab('pharmacy')">💊 약국으로 →</button>
+      </div>
+      <div class="notice-tiny">실제 의약품이 아닌 교육용 티칭 자료입니다</div>
+    </div><!-- /phaseResult -->
+
+  </div><!-- /panelHospital -->
+
+  <!-- ═══════════ PHARMACY TAB ═══════════ -->
+  <div class="panel" id="panelPharmacy">
+
+    <div class="pharmacy-hero">
+      <div class="ph-signage">
+        <div class="ph-cross">+</div>
+        <div class="ph-sign-text">
+          <div class="l1">BIGCAT</div>
+          <div class="l2">Drug Store</div>
+        </div>
+        <!-- mortar & pestle SVG -->
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="30" r="14" stroke="#1A6FE8" stroke-width="2.5" fill="none"/>
+          <path d="M14 30 Q14 42 24 42 Q34 42 34 30" stroke="#1A6FE8" stroke-width="2.5" fill="#D6E8FF"/>
+          <line x1="18" y1="14" x2="32" y2="26" stroke="#1A6FE8" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="18" cy="13" r="3" fill="#1A6FE8"/>
+          <text x="24" y="35" text-anchor="middle" font-size="10" fill="#1A6FE8" font-weight="700">+</text>
+        </svg>
+      </div>
+      <div class="ph-body">
+        <div class="ph-body-text">처방전에 맞는 맞춤 키트를<br/>여기서 받아가세요</div>
+        <div class="ph-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- Recommended (shown only after diagnosis) -->
+    <div class="rec-card" id="recCard" style="display:none;">
+      <div class="rec-header">
+        <span id="recEmoji" style="font-size:20px;">🎭</span>
+        <div>
+          <div class="rec-title" id="recTitle">처방 키트</div>
+          <div class="rec-sub">진단 결과 기반 추천</div>
+        </div>
+      </div>
+      <div class="rec-chips" id="recChips"></div>
+    </div>
+
+    <div class="kits-title">📦 전체 키트 목록</div>
+    <div id="kitList"></div>
+
+    <div class="pharmacy-notice">
+      실제 의약품 또는 치료 서비스를 제공하지 않습니다<br/>
+      강사 연수와 수업 자료 추천을 위한 교육용 브랜딩 자료입니다
+    </div>
+
+  </div><!-- /panelPharmacy -->
+
+</div><!-- /content -->
+
+<script>
+// ── DATA ──
+const QUESTIONS = [
+  { text: "수업 중 아이들이 갑자기 멍해졌습니다. 당신의 첫 반응은?", options: ["분위기 전환 활동으로 즉시 바꾼다 (E)", "계획했던 흐름대로 계속 진행한다 (S)", "아이들에게 말을 걸며 반응을 끌어낸다 (I)", "잠시 멈추고 차분하게 집중시킨다 (C)"] },
+  { text: "계획한 활동이 예상보다 빨리 무너졌습니다. 다음 선택은?", options: ["즉흥적으로 다른 활동을 시작한다 (E)", "백업 플랜을 꺼낸다 (S)", "아이들에게 하고 싶은 걸 물어본다 (I)", "수업을 잠깐 리셋하고 규칙을 다시 상기시킨다 (C)"] },
+  { text: "아이가 엉뚱한 영어를 말했을 때 가장 자연스러운 반응은?", options: ["크게 칭찬하고 분위기를 띄운다 (E)", "올바른 표현을 구조적으로 설명한다 (S)", "비슷한 다른 표현을 유도하며 이어간다 (I)", "부드럽게 교정 후 다음으로 넘긴다 (C)"] },
+  { text: "수업 중 가장 '내가 살아있다'고 느끼는 순간은?", options: ["아이들이 웃고 에너지가 폭발할 때 (E)", "계획한 흐름이 완벽히 맞아떨어질 때 (S)", "아이가 처음으로 스스로 말할 때 (I)", "교실이 질서 있게 움직일 때 (C)"] },
+  { text: "당신의 수업 템포는 어디에 가깝나요?", options: ["롤러코스터형 – 오르내리며 자극적 (E)", "안정형 – 예측 가능하고 일관됨 (S)", "유동형 – 아이 반응에 따라 달라짐 (I)", "조절형 – 상황마다 속도를 조절 (C)"] },
+  { text: "한 아이가 계속 자리를 이탈할 때 가장 먼저 하는 행동은?", options: ["게임이나 활동으로 주의를 끌어당긴다 (E)", "자리 배치나 루틴을 재점검한다 (S)", "개인적으로 조용히 말을 건넨다 (I)", "명확한 규칙을 다시 상기시킨다 (C)"] },
+  { text: "아이들이 동시에 떠들기 시작하면 어떤 루틴을 쓰나요?", options: ["큰 소리나 행동으로 분위기를 전환한다 (E)", "미리 정해둔 집중 루틴 카드를 사용한다 (S)", "한 명을 지목해 발언권을 준다 (I)", "손 신호나 약속된 사인으로 조용히 한다 (C)"] },
+  { text: "평균 수업 준비 스타일은?", options: ["즉흥형 – 큰 흐름만 잡고 나머지는 현장에서 (E)", "완벽 준비형 – 시간표까지 세밀하게 준비 (S)", "기본 준비형 – 아이 반응 보고 조율할 여지 둠 (I)", "자료 중심형 – 교구·카드 위주로 구성 (C)"] },
+  { text: "말하지 않는 아이를 만났을 때 어떻게 참여를 유도하나요?", options: ["게임이나 노래로 자연스럽게 끌어당긴다 (E)", "단계별 발화 구조를 설계해 접근한다 (S)", "짝 활동이나 한 단어 참여로 시작한다 (I)", "안심할 수 있는 환경을 먼저 만들어준다 (C)"] },
+  { text: "더 견디기 힘든 상황은?", options: ["시끄럽고 통제가 안 될 때 (C→낮음)", "조용한데 반응이 전혀 없을 때 (I→낮음)", "계획이 완전히 무너질 때 (S→낮음)", "에너지가 없고 수업이 늘어질 때 (E→낮음)"] },
+  { text: "수업 도입에서 가장 자주 쓰는 방법은?", options: ["신나는 노래나 율동으로 시작 (E)", "지난 수업 복습으로 시작 (S)", "질문 던지며 대화로 시작 (I)", "규칙 확인 후 조용히 시작 (C)"] },
+  { text: "아이들이 내 수업을 어떻게 기억하길 바라나요?", options: ["재미있고 에너지 넘쳤던 수업 (E)", "체계적이고 잘 배웠던 수업 (S)", "선생님이 내 말을 잘 들어줬던 수업 (I)", "안전하고 편안했던 수업 (C)"] },
+  { text: "수업 중 가장 많이 쓰는 표현은?", options: ["'다같이!' '와~!' '레츠고!' (E)", "'자, 이제 다음 단계는...' (S)", "'너는 어떻게 생각해?' (I)", "'우리 약속 기억하지?' (C)"] },
+  { text: "수업 마무리는 어떻게 하나요?", options: ["신나는 마무리 챈트나 게임으로 끝낸다 (E)", "오늘 배운 것을 정리하고 리뷰한다 (S)", "아이들이 한 마디씩 말하며 마친다 (I)", "다음 수업 규칙이나 예고를 하고 마친다 (C)"] },
+  { text: "수업 후 가장 뿌듯한 순간은?", options: ["아이들이 '재밌었어요!'라고 할 때 (E)", "계획한 대로 수업이 딱 끝났을 때 (S)", "말 못하던 아이가 오늘 말했을 때 (I)", "교실이 처음부터 끝까지 질서 있었을 때 (C)"] },
+  { text: "활동 전환 시 가장 먼저 하는 것은?", options: ["노래나 챈트로 분위기 바꿈 (E)", "순서 보드나 카드로 다음 활동 안내 (S)", "아이들에게 다음 활동을 설명하며 기대감 조성 (I)", "조용히 앉도록 신호를 준 뒤 전환 (C)"] },
+  { text: "가장 잘 다루는 수업 상황은?", options: ["아이들이 흥분해서 에너지 넘칠 때 (E)", "새로운 개념을 단계별로 가르칠 때 (S)", "아이와 1:1로 대화를 이어갈 때 (I)", "여러 아이를 동시에 관리할 때 (C)"] },
+  { text: "학부모 상담에서 자주 듣는 말은?", options: ["'아이가 수업 가고 싶다고 해요!' (E)", "'체계적으로 가르쳐주셔서 감사해요' (S)", "'선생님이 아이 말을 잘 들어주세요' (I)", "'수업이 안정적이라 믿음이 가요' (C)"] },
+  { text: "수업 중 가장 힘들게 느끼는 순간은?", options: ["아이들 에너지가 없고 무반응일 때 (E)", "준비한 자료가 맞지 않을 때 (S)", "아이들이 대화를 거부할 때 (I)", "교실 통제가 무너질 때 (C)"] },
+  { text: "나의 수업 철학에 가장 가까운 것은?", options: ["수업은 에너지다 – 기억에 남는 경험 (E)", "수업은 설계다 – 잘 짜인 구조가 최고 (S)", "수업은 대화다 – 말하는 아이가 배운다 (I)", "수업은 안전지대다 – 편안해야 배운다 (C)"] },
+];
+
+const TYPES = {
+  "E+I": { name:"엔터테이너형", emoji:"🎭", color:"#FF4757", desc:"반응을 빠르게 끌어내고 분위기를 띄웁니다. 아이들이 수업을 기다리게 만드는 마법사예요!", kits:["Focus Pill","Transition Medicine","Behavior Calm Kit"] },
+  "E+C": { name:"카리스마형",   emoji:"⚡", color:"#FF8C00", desc:"에너지와 리더십으로 교실을 이끕니다. 아이들이 자연스럽게 따라오게 만드는 힘이 있어요!", kits:["Speaking Booster","Confidence Vitamin","Parent Smile Pack"] },
+  "S+C": { name:"설계자형",     emoji:"🏗️", color:"#1A6FE8", desc:"구조와 안정감을 바탕으로 수업을 운영합니다. 계획된 수업의 완성도가 탁월해요!", kits:["Speaking Booster","Confidence Vitamin","Focus Pill"] },
+  "S+I": { name:"코치형",       emoji:"🎯", color:"#20B2AA", desc:"단계적 질문과 발화 설계가 강합니다. 아이를 천천히 성장시키는 데 탁월해요!", kits:["Focus Pill","Speaking Booster","Transition Medicine"] },
+  "I+C": { name:"케어형",       emoji:"💚", color:"#2EDCB5", desc:"아이를 세심히 보면서도 교실을 안정적으로 관리합니다. 아이들이 가장 편안해하는 선생님이에요!", kits:["Transition Medicine","Behavior Calm Kit","Parent Smile Pack"] },
+  "E+S": { name:"밸런서형",     emoji:"⚖️", color:"#9B59B6", desc:"준비와 현장 에너지를 고르게 활용합니다. 어떤 상황에서도 흔들리지 않는 안정감이 있어요!", kits:["Speaking Booster","Confidence Vitamin","Focus Pill"] },
+};
+
+const KITS = {
+  "Focus Pill":        { emoji:"💊", color:"#FF4757", desc:"집중력이 무너질 때 꺼내 쓰는 회복 키트", items:["3분 집중 루틴 카드 5종","Call & Response 문장 카드 5종","Freeze/Clap/Touch 미니게임 카드","시각 타이머 카드","책상 위 미션 카드 템플릿","수업 중반 리셋용 챈트 스크립트"] },
+  "Speaking Booster":  { emoji:"🗣️", color:"#1A6FE8", desc:"발화를 자연스럽게 끌어내는 게임 키트", items:["질문 카드 24장","패턴 문장 스트립 12종","Roll & Talk 주사위 게임판","Picture Relay 카드","짝 활동용 미니 대화 스크립트","말하기 빙고판 2종"] },
+  "Transition Medicine":{ emoji:"🔄", color:"#20B2AA", desc:"활동 전환을 매끄럽게 연결하는 전이 키트", items:["Clean-up song 가사 카드","Line-up song 가사 카드","Sit down 루틴 챈트","Next/Now/Finished 보드","활동 순서 그림 카드","전이용 TPR 동작 카드"] },
+  "Behavior Calm Kit": { emoji:"🕊️", color:"#9B59B6", desc:"문제 행동 시 감정 안정과 재참여를 돕는 키트", items:["상황별 대응 루틴 카드 4종","감정 온도계 포스터","Quiet Corner 안내 카드","Class Rules 포스터 템플릿","선택 제시 문장 카드","재참여 미션 카드"] },
+  "Confidence Vitamin":{ emoji:"⭐", color:"#FF8C00", desc:"소극적인 아이를 안전하게 참여시키는 지원 키트", items:["한 단어 참여 카드","Yes/No 선택 카드","짝 활동 스크립트 카드","용기 스티커 시트","4주 발화 성장 기록지","칭찬 문장 템플릿"] },
+  "Parent Smile Pack": { emoji:"😊", color:"#2EDCB5", desc:"학부모가 수업 가치를 눈으로 확인하게 해주는 소통 키트", items:["오늘의 수업 리포트 템플릿","집에서 해보는 복습 활동지","부모용 대화 카드","사진·영상 촬영 체크리스트","상담용 한 줄 코멘트 뱅크","주간 성장 메모 템플릿"] },
+};
+
+const AXIS_COLORS = { E:"#FF4757", S:"#1A6FE8", I:"#2EDCB5", C:"#9B59B6" };
+const AXIS_LABELS = { E:"Energy", S:"Structure", I:"Interaction", C:"Control" };
+const OPT_LETTERS = ["A","B","C","D"];
+
+// ── STATE ──
+let state = { phase:"intro", current:0, scores:{E:0,S:0,I:0,C:0}, result:null };
+
+function parseAxis(opt) {
+  const m = opt.match(/\(([ESIC])\)/);
+  return m ? m[1] : null;
+}
+function getType(sc) {
+  const sorted = ["E","S","I","C"].sort((a,b) => sc[b]-sc[a]);
+  const key = [sorted[0],sorted[1]].sort().join("+");
+  return TYPES[key] || TYPES["E+I"];
+}
+
+// ── TABS ──
+function switchTab(t) {
+  document.getElementById('panelHospital').classList.toggle('active', t==='hospital');
+  document.getElementById('panelPharmacy').classList.toggle('active', t==='pharmacy');
+  document.getElementById('tabHospital').classList.toggle('active', t==='hospital');
+  document.getElementById('tabPharmacy').classList.toggle('active', t==='pharmacy');
+}
+
+// ── QUIZ ──
+function startQuiz() {
+  state = { phase:'quiz', current:0, scores:{E:0,S:0,I:0,C:0}, result:null };
+  show('phaseIntro', false); show('phaseQuiz', true); show('phaseResult', false);
+  renderQuestion();
+}
+function show(id, visible) {
+  document.getElementById(id).style.display = visible ? 'block' : 'none';
+}
+function renderQuestion() {
+  const q = QUESTIONS[state.current];
+  const pct = Math.round((state.current / QUESTIONS.length)*100);
+  document.getElementById('qNum').textContent = `Q${state.current+1}`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('progressLabel').textContent = `문항 ${state.current+1} / ${QUESTIONS.length}`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+
+  const ol = document.getElementById('optionsList');
+  ol.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const axis = parseAxis(opt);
+    const col = AXIS_COLORS[axis] || '#1A6FE8';
+    const label = opt.replace(/ \([ESIC](?:→낮음)?\)$/, '');
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `
+      <div class="opt-letter" style="background:${col}20;color:${col};">${OPT_LETTERS[i]}</div>
+      <span class="opt-text">${label}</span>`;
+    btn.onclick = () => chooseAnswer(opt);
+    ol.appendChild(btn);
+  });
+}
+function chooseAnswer(opt) {
+  const axis = parseAxis(opt);
+  if (axis && ['E','S','I','C'].includes(axis)) state.scores[axis]++;
+  state.current++;
+  if (state.current >= QUESTIONS.length) finishQuiz();
+  else renderQuestion();
+}
+function finishQuiz() {
+  state.result = getType(state.scores);
+  show('phaseQuiz', false);
+  renderResult();
+  show('phaseResult', true);
+  document.getElementById('resetBtn').style.display = 'block';
+  renderPharmacyRec();
+  switchTab('pharmacy');
+}
+
+// ── RESULT ──
+function renderResult() {
+  const r = state.result, sc = state.scores;
+  const today = new Date().toLocaleDateString('ko-KR');
+
+  document.getElementById('rxHeader').style.background = `linear-gradient(135deg, ${r.color}EE, ${r.color}88)`;
+  document.getElementById('rxEmoji').textContent = r.emoji;
+  document.getElementById('rxTypeName').textContent = r.name;
+  document.getElementById('rxDate').textContent = `진단일: ${today}`;
+  document.getElementById('rxDesc').textContent = r.desc;
+
+  const name = document.getElementById('inputName').value || '-';
+  const org  = document.getElementById('inputOrg').value  || '-';
+  const age  = document.getElementById('inputAge').value  || '-';
+  document.getElementById('rxInfoGrid').innerHTML = `
+    <div class="rx-info-item"><div class="lbl">이름</div><div class="val">${name}</div></div>
+    <div class="rx-info-item"><div class="lbl">기관명</div><div class="val">${org}</div></div>
+    <div class="rx-info-item"><div class="lbl">담당 연령</div><div class="val">${age}</div></div>`;
+
+  const bars = document.getElementById('scoresBars');
+  bars.innerHTML = ['E','S','I','C'].map(k => `
+    <div class="score-row">
+      <div class="score-meta">
+        <span class="score-key">${k} · ${AXIS_LABELS[k]}</span>
+        <span class="score-val" style="color:${AXIS_COLORS[k]};">${sc[k]}</span>
+      </div>
+      <div class="score-bar">
+        <div class="score-fill" style="background:${AXIS_COLORS[k]};width:${(sc[k]/10)*100}%;"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PHARMACY ──
+function renderPharmacyRec() {
+  const r = state.result;
+  if (!r) return;
+  const rc = document.getElementById('recCard');
+  rc.style.display = 'block';
+  document.getElementById('recEmoji').textContent = r.emoji;
+  document.getElementById('recTitle').textContent = `${r.name} 처방 키트`;
+  const labels = ['1차 추천','2차 추천','보조 추천'];
+  document.getElementById('recChips').innerHTML = r.kits.map((kit,i) => {
+    const k = KITS[kit];
+    return `<div class="rec-chip" style="background:${k.color}15;border-color:${k.color}50;">
+      <span style="font-size:14px;">${k.emoji}</span>
+      <div>
+        <div class="rec-chip-label" style="color:${k.color};">${labels[i]}</div>
+        <div class="rec-chip-name">${kit}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildKitList() {
+  const el = document.getElementById('kitList');
+  el.innerHTML = '';
+  Object.entries(KITS).forEach(([name, kit]) => {
+    const isRec = state.result?.kits.includes(name);
+    const div = document.createElement('div');
+    div.className = 'kit-item' + (isRec ? ' recommended' : '');
+    div.style.borderColor = isRec ? kit.color+'60' : 'transparent';
+    const bodyId = 'kb_' + name.replace(/\s/g,'_');
+    const chevId = 'kc_' + name.replace(/\s/g,'_');
+    div.innerHTML = `
+      <div class="kit-head" onclick="toggleKit('${bodyId}','${chevId}')">
+        <div class="kit-icon" style="background:${kit.color}20;">${kit.emoji}</div>
+        <div style="flex:1;">
+          <div class="kit-name">${name}${isRec ? `<span class="kit-badge" style="background:${kit.color};">추천</span>` : ''}</div>
+          <div class="kit-desc">${kit.desc}</div>
+        </div>
+        <div class="kit-chevron" id="${chevId}">▼</div>
+      </div>
+      <div class="kit-body" id="${bodyId}">
+        <div class="kit-items-title">구성품</div>
+        ${kit.items.map((item,i) => `
+          <div class="kit-item-row">
+            <div class="kit-item-num" style="background:${kit.color}20;color:${kit.color};">${i+1}</div>
+            <div class="kit-item-text">${item}</div>
+          </div>`).join('')}
+        <div class="kit-footer">💬 처방전을 지참하고 강사 연수 부스에서 수령하세요</div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+function toggleKit(bodyId, chevId) {
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ── PRINT ──
+function printPrescription() {
+  const r = state.result, sc = state.scores;
+  if (!r) return;
+  const today = new Date().toLocaleDateString('ko-KR');
+  const name = document.getElementById('inputName').value || '-';
+  const org  = document.getElementById('inputOrg').value  || '-';
+  const age  = document.getElementById('inputAge').value  || '-';
+  const kitLabels = ['1차 추천','2차 추천','보조 추천'];
+
+  const scoresHtml = ['E','S','I','C'].map(k => `
+    <div style="margin-bottom:9px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span style="font-size:11px;color:#7A9ACC;font-weight:600;">${k} · ${AXIS_LABELS[k]}</span>
+        <span style="font-size:11px;color:${AXIS_COLORS[k]};font-weight:800;">${sc[k]}</span>
+      </div>
+      <div style="height:7px;background:#D6E8FF;border-radius:99px;">
+        <div style="height:100%;background:${AXIS_COLORS[k]};border-radius:99px;width:${(sc[k]/10)*100}%;"></div>
+      </div>
+    </div>`).join('');
+
+  const kitsHtml = r.kits.map((kit,i) => `
+    <span style="display:inline-flex;align-items:center;gap:5px;background:${KITS[kit].color}15;border:1.5px solid ${KITS[kit].color}50;border-radius:8px;padding:6px 11px;margin:3px;">
+      <span style="font-size:13px;">${KITS[kit].emoji}</span>
+      <span style="font-size:11px;font-weight:700;color:#0A1F5C;">${kitLabels[i]}: ${kit}</span>
+    </span>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"/>
+<title>BigCat Drug Store · 티칭 처방전</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans KR',sans-serif;background:white;}
+  @page{size:A4;margin:18mm 14mm;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style></head><body>
+<div style="max-width:560px;margin:0 auto;padding:20px;">
+
+  <!-- TOP BRAND BAR -->
+  <div style="background:#0D4DB5;border-radius:12px 12px 0 0;padding:10px 18px;display:flex;align-items:center;gap:10px;">
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#FFD93D;">+</span>
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:white;letter-spacing:1px;">BigCat Drug Store</span>
+    <span style="margin-left:auto;font-size:9px;color:#D6E8FF;letter-spacing:2px;font-weight:700;">TEACHING PRESCRIPTION Rx</span>
+  </div>
+
+  <!-- RX HEADER -->
+  <div style="background:linear-gradient(135deg,${r.color}EE,${r.color}88);padding:22px 20px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="font-size:56px;line-height:1;">${r.emoji}</div>
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;color:white;letter-spacing:1px;">${r.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:3px;">진단일: ${today}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATIENT INFO -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#F0F5FF;padding:14px 18px;border:1.5px solid #D6E8FF;border-top:none;">
+    <div><div style="font-size:9px;color:#7A9ACC;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">이름</div><div style="font-size:14px;color:#0A1F5C;font-weight:700;">${name}</div></div>
+    <div><div style="font-size:9px;color:#7A9ACC;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">기관명</div><div style="font-size:14px;color:#0A1F5C;font-weight:700;">${org}</div></div>
+    <div><div style="font-size:9px;color:#7A9ACC;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">담당 연령</div><div style="font-size:14px;color:#0A1F5C;font-weight:700;">${age}</div></div>
+  </div>
+
+  <!-- DASHED DIVIDER -->
+  <div style="border-top:2px dashed #D6E8FF;margin:16px 0;"></div>
+
+  <!-- DESCRIPTION -->
+  <p style="font-size:13px;color:#3A5A9C;line-height:1.75;margin-bottom:18px;">${r.desc}</p>
+
+  <!-- STRENGTHS / CAUTION -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+    <div style="background:#F0FFF4;border-radius:12px;padding:14px;">
+      <div style="font-size:12px;font-weight:700;color:#22863A;margin-bottom:9px;">✅ 강점</div>
+      ${["분위기를 빠르게 살린다","아이들의 참여를 자연스럽게 끌어낸다","수업 에너지가 높아 몰입감이 좋다"].map(s=>`
+        <div style="font-size:11px;color:#0A1F5C;padding:3px 0;display:flex;gap:5px;line-height:1.5;"><span style="color:#22863A;">•</span>${s}</div>`).join('')}
+    </div>
+    <div style="background:#FFF5F5;border-radius:12px;padding:14px;">
+      <div style="font-size:12px;font-weight:700;color:#C0392B;margin-bottom:9px;">⚠️ 주의점</div>
+      ${["마무리가 약해질 수 있다","활동 전환이 급할 수 있다","학습 포인트 정리가 부족할 수 있다"].map(s=>`
+        <div style="font-size:11px;color:#0A1F5C;padding:3px 0;display:flex;gap:5px;line-height:1.5;"><span style="color:#C0392B;">•</span>${s}</div>`).join('')}
+    </div>
+  </div>
+
+  <!-- SCORES -->
+  <div style="background:#F0F5FF;border-radius:12px;padding:14px;border:1.5px solid #D6E8FF;margin-bottom:18px;">
+    <div style="font-size:11px;font-weight:700;color:#7A9ACC;margin-bottom:11px;letter-spacing:0.5px;">📊 성향 점수</div>
+    ${scoresHtml}
+  </div>
+
+  <!-- DASHED DIVIDER -->
+  <div style="border-top:2px dashed #D6E8FF;margin-bottom:16px;"></div>
+
+  <!-- KITS -->
+  <div style="margin-bottom:20px;">
+    <div style="font-size:12px;font-weight:700;color:#0A1F5C;margin-bottom:10px;">💊 오늘의 처방 키트</div>
+    <div style="display:flex;flex-wrap:wrap;">${kitsHtml}</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#0D4DB5;border-radius:0 0 12px 12px;padding:10px 18px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:10px;color:#D6E8FF;line-height:1.6;">본 자료는 교육용 티칭 처방 자료입니다<br/>실제 의약품이 아닙니다</span>
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:#FFD93D;letter-spacing:1px;">+ BigCat Drug Store</span>
+  </div>
+
+</div>
+<script>window.onload=()=>window.print();<\/script>
+</body></html>`;
+
+  const w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ── RESET ──
+function resetAll() {
+  state = { phase:'intro', current:0, scores:{E:0,S:0,I:0,C:0}, result:null };
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('recCard').style.display = 'none';
+  show('phaseIntro', true); show('phaseQuiz', false); show('phaseResult', false);
+  switchTab('hospital');
+}
+
+// ── INIT ──
+buildKitList();
+</script>
+</body>
+</html>
